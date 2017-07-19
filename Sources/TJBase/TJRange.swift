@@ -27,9 +27,9 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
             case let (.Closed(v1), .Closed(v2)) where v1 == v2: return "\(v1)"
             case let (.Closed(v1), .Closed(v2)):                return "\(v1) ... \(v2)"
             case let (.Closed(v1), .Max):                       return "\(v1) ... ∞"
-            case let (.OpenHigh(v1), .OpenLow(v2)):             return "\(v1) <.< \(v2)"
-            case let (.OpenHigh(v1), .Closed(v2)):              return "\(v1) <.. \(v2)"
-            case let (.OpenHigh(v1), .Max):                     return "\(v1) <.. ∞"
+            case let (.OpenHigh(v1), .OpenLow(v2)):             return "\(v1) >.< \(v2)"
+            case let (.OpenHigh(v1), .Closed(v2)):              return "\(v1) >.. \(v2)"
+            case let (.OpenHigh(v1), .Max):                     return "\(v1) >.. ∞"
             default: preconditionFailure("lowerBound, upperBound types combination is not allowed.")
         }
     }
@@ -62,8 +62,16 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
         self.init(.Closed(range.lowerBound), .Closed(range.upperBound))
     }
 
+    init(leftOpen range: ClosedRange<T>) {
+        self.init(.OpenHigh(range.lowerBound), .Closed(range.upperBound))
+    }
+
     init(_ range: Range<T>) {
         self.init(.Closed(range.lowerBound), .OpenLow(range.upperBound))
+    }
+
+    init(leftOpen range: Range<T>) {
+        self.init(.OpenHigh(range.lowerBound), .OpenLow(range.upperBound))
     }
 
     init(_ range: PartialRangeFrom<T>) {
@@ -72,6 +80,10 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
 
     init(_ range: PartialRangeUpTo<T>) {
         self.init(.Min, .OpenLow(range.upperBound))
+    }
+
+    init(_ range: PartialRangeThrough<T>) {
+        self.init(.Min, .Closed(range.upperBound))
     }
 
     static func ~~(lhs: T, rhs: TJRange) -> Bool {
