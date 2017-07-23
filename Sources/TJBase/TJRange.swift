@@ -86,23 +86,23 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
         self.init(.Min, .Closed(range.upperBound))
     }
 
-    static func ~~(lhs: T, rhs: TJRange) -> Bool {
+    static func ==(lhs: T, rhs: TJRange) -> Bool {
         return lhs >= rhs.lowerBound && lhs <= rhs.upperBound
     }
 
-    static func ~~(lhs: TJBoundType<T>, rhs: TJRange) -> Bool {
+    static func ==(lhs: TJBoundType<T>, rhs: TJRange) -> Bool {
         return lhs >= rhs.lowerBound && lhs <= rhs.upperBound
     }
 
-    static func ><(lhs: T, rhs: TJRange) -> Bool {
+    static func !=(lhs: T, rhs: TJRange) -> Bool {
         return lhs < rhs.lowerBound || lhs > rhs.upperBound
     }
 
-    static func <<(lhs: T, rhs: TJRange) -> Bool {
+    static func <(lhs: T, rhs: TJRange) -> Bool {
         return lhs < rhs.lowerBound
     }
 
-    static func >>(lhs: T, rhs: TJRange) -> Bool {
+    static func >(lhs: T, rhs: TJRange) -> Bool {
         return lhs > rhs.upperBound
     }
 
@@ -114,15 +114,19 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
         return lhs.lowerBound > rhs.upperBound
     }
 
-    static func ==(lhs: TJRange, rhs: TJRange) -> Bool {
+    static func ===(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound == rhs.lowerBound && lhs.upperBound == rhs.upperBound
     }
 
-    static func ~~(lhs: TJRange, rhs: TJRange) -> Bool {
+    static func !==(lhs: TJRange, rhs: TJRange) -> Bool {
+        return lhs.lowerBound != rhs.lowerBound || lhs.upperBound != rhs.upperBound
+    }
+
+    static func ==(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound >= rhs.lowerBound && lhs.upperBound <= rhs.upperBound
     }
 
-    static func ><(lhs: TJRange, rhs: TJRange) -> Bool {
+    static func !=(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.upperBound < rhs.lowerBound || lhs.lowerBound > rhs.upperBound
     }
 
@@ -130,38 +134,38 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
         return lhs.lowerBound < rhs.lowerBound && lhs.upperBound > rhs.upperBound
     }
 
-    static func <=>(lhs: TJRange, rhs: TJRange) -> Bool {
+    static func ≤≥(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound <= rhs.lowerBound && lhs.upperBound >= rhs.upperBound
     }
 
-    static func <~(lhs: TJRange, rhs: TJRange) -> Bool {
-        return lhs.lowerBound < rhs.lowerBound && lhs.upperBound ~~ rhs
+    static func <=(lhs: TJRange, rhs: TJRange) -> Bool {
+        return lhs.lowerBound < rhs.lowerBound && lhs.upperBound == rhs
     }
 
-    static func <=~(lhs: TJRange, rhs: TJRange) -> Bool {
-        return lhs.lowerBound <= rhs.lowerBound && lhs.upperBound ~~ rhs
+    static func ≤=(lhs: TJRange, rhs: TJRange) -> Bool {
+        return lhs.lowerBound <= rhs.lowerBound && lhs.upperBound == rhs
     }
 
-    static func ~>(lhs: TJRange, rhs: TJRange) -> Bool {
-        return lhs.lowerBound ~~ rhs && lhs.upperBound > rhs.upperBound
+    static func =>(lhs: TJRange, rhs: TJRange) -> Bool {
+        return lhs.lowerBound == rhs && lhs.upperBound > rhs.upperBound
     }
 
-    static func ~>=(lhs: TJRange, rhs: TJRange) -> Bool {
-        return lhs.lowerBound ~~ rhs && lhs.upperBound >= rhs.upperBound
+    static func =≥(lhs: TJRange, rhs: TJRange) -> Bool {
+        return lhs.lowerBound == rhs && lhs.upperBound >= rhs.upperBound
     }
 
     static func -(lhs: TJRange, rhs: TJRange) -> [TJRange] {
-        if lhs <=> rhs {
+        if lhs ≤≥ rhs {
             // Fully overlapping means the rhs dissapears.
             return []
 
-        } else if lhs >< rhs {
+        } else if lhs != rhs {
             // Not overlapping.
             return [lhs]
 
-        } else if lhs ~>= rhs {
+        } else if lhs =≥ rhs {
             // Overlapping on the lower bound, rhs becomes shorter.
-            switch (lhs.lowerBound) {
+            switch lhs.lowerBound {
                 case     .Min:          return [TJRange(rhs.lowerBound, .Min)]
                 case let .OpenLow(v):   return [TJRange(rhs.lowerBound, .OpenLow(v))]
                 case let .Closed(v):    return [TJRange(rhs.lowerBound, .OpenLow(v))]
@@ -169,9 +173,9 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
                 case     .Max:          return [TJRange(rhs.lowerBound, .Max)]
             }
 
-        } else if lhs <=~ rhs {
+        } else if lhs ≤= rhs {
             // Overlapping on the lower bound, rhs becomes shorter.
-            switch (lhs.upperBound) {
+            switch lhs.upperBound {
                 case     .Min:          return [TJRange(.Min,           rhs.upperBound)]
                 case let .OpenLow(v):   return [TJRange(.Closed(v),     rhs.upperBound)]
                 case let .Closed(v):    return [TJRange(.OpenHigh(v),   rhs.upperBound)]
@@ -183,7 +187,7 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
             // lhs is completely inside rhs without touching the edges.
             var ranges : [TJRange<T>] = []
 
-            switch (lhs.lowerBound) {
+            switch lhs.lowerBound {
                 case     .Min:          ranges.append(TJRange(rhs.lowerBound, .Min))
                 case let .OpenLow(v):   ranges.append(TJRange(rhs.lowerBound, .OpenLow(v)))
                 case let .Closed(v):    ranges.append(TJRange(rhs.lowerBound, .OpenLow(v)))
@@ -191,7 +195,7 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
                 case     .Max:          ranges.append(TJRange(rhs.lowerBound, .Max))
             }
 
-            switch (lhs.upperBound) {
+            switch lhs.upperBound {
                 case     .Min:          ranges.append(TJRange(.Min,           rhs.upperBound))
                 case let .OpenLow(v):   ranges.append(TJRange(.Closed(v),     rhs.upperBound))
                 case let .Closed(v):    ranges.append(TJRange(.OpenHigh(v),   rhs.upperBound))
@@ -205,6 +209,24 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
 
     static func -(lhs: TJRange, rhs: ClosedRange<T>) -> [TJRange] {
         return lhs - TJRange(rhs)
+    }
+
+
+}
+
+extension Array: Equatable where Element: Comparable {
+    func ==<T>(lhs: [T], rhs: [T]) -> Bool {
+        guard lhs.count == rhs.count else {
+            return false
+        }
+
+        for i in 0 ..< lhs.count {
+            guard lhs[i] === rhs[i] else {
+                return false
+            }
+        }
+
+        return true
     }
 }
 

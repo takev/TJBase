@@ -75,9 +75,9 @@ struct TJRangeSet<T: Comparable>: Sequence {
         return elements.makeIterator()
     }
 
-    static func ~~(lhs: T, rhs: TJRangeSet) -> Bool {
+    static func ==(lhs: T, rhs: TJRangeSet) -> Bool {
         for element in rhs.elements {
-            if lhs ~~ element {
+            if lhs == element {
                 return true
             }
         }
