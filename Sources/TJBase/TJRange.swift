@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-struct TJRange<T: Comparable>: CustomStringConvertible {
+public struct TJRange<T: Comparable>: CustomStringConvertible {
     let lowerBound: TJBoundType<T>
     let upperBound: TJBoundType<T>
 
- var description : String {
+    public var description : String {
         switch (lowerBound, upperBound) {
             case let (.Min, .OpenLow(v2)):                      return "∞ ..< \(v2)"
             case let (.Min, .Closed(v2)):                       return "∞ ... \(v2)"
@@ -50,47 +50,47 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
         self.upperBound = upperBound
     }
 
-    init() {
+    public init() {
         self.init(.Min, .Max)
     }
 
-    init(_ value: T) {
+    public init(_ value: T) {
         self.init(.Closed(value), .Closed(value))
     }
 
-    init(_ range: ClosedRange<T>) {
+    public init(_ range: ClosedRange<T>) {
         self.init(.Closed(range.lowerBound), .Closed(range.upperBound))
     }
 
-    init(leftOpen range: ClosedRange<T>) {
+    public init(leftOpen range: ClosedRange<T>) {
         self.init(.OpenHigh(range.lowerBound), .Closed(range.upperBound))
     }
 
-    init(_ range: Range<T>) {
+    public init(_ range: Range<T>) {
         self.init(.Closed(range.lowerBound), .OpenLow(range.upperBound))
     }
 
-    init(leftOpen range: Range<T>) {
+    public init(leftOpen range: Range<T>) {
         self.init(.OpenHigh(range.lowerBound), .OpenLow(range.upperBound))
     }
 
-    init(_ range: PartialRangeFrom<T>) {
+    public init(_ range: PartialRangeFrom<T>) {
         self.init(.Closed(range.lowerBound), .Max)
     }
 
-    init(leftOpen range: PartialRangeFrom<T>) {
+    public init(leftOpen range: PartialRangeFrom<T>) {
         self.init(.OpenHigh(range.lowerBound), .Max)
     }
 
-    init(_ range: PartialRangeUpTo<T>) {
+    public init(_ range: PartialRangeUpTo<T>) {
         self.init(.Min, .OpenLow(range.upperBound))
     }
 
-    init(_ range: PartialRangeThrough<T>) {
+    public init(_ range: PartialRangeThrough<T>) {
         self.init(.Min, .Closed(range.upperBound))
     }
 
-    static func ==(lhs: T, rhs: TJRange) -> Bool {
+    public static func ==(lhs: T, rhs: TJRange) -> Bool {
         return lhs >= rhs.lowerBound && lhs <= rhs.upperBound
     }
 
@@ -98,67 +98,67 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
         return lhs >= rhs.lowerBound && lhs <= rhs.upperBound
     }
 
-    static func !=(lhs: T, rhs: TJRange) -> Bool {
+    public static func !=(lhs: T, rhs: TJRange) -> Bool {
         return lhs < rhs.lowerBound || lhs > rhs.upperBound
     }
 
-    static func <(lhs: T, rhs: TJRange) -> Bool {
+    public static func <(lhs: T, rhs: TJRange) -> Bool {
         return lhs < rhs.lowerBound
     }
 
-    static func >(lhs: T, rhs: TJRange) -> Bool {
+    public static func >(lhs: T, rhs: TJRange) -> Bool {
         return lhs > rhs.upperBound
     }
 
-    static func <<(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func <<(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.upperBound < rhs.lowerBound
     }
 
-    static func >>(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func >>(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound > rhs.upperBound
     }
 
-    static func ===(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func ===(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound == rhs.lowerBound && lhs.upperBound == rhs.upperBound
     }
 
-    static func !==(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func !==(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound != rhs.lowerBound || lhs.upperBound != rhs.upperBound
     }
 
-    static func ==(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func ==(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound >= rhs.lowerBound && lhs.upperBound <= rhs.upperBound
     }
 
-    static func !=(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func !=(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.upperBound < rhs.lowerBound || lhs.lowerBound > rhs.upperBound
     }
 
-    static func <>(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func <>(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound < rhs.lowerBound && lhs.upperBound > rhs.upperBound
     }
 
-    static func ≤≥(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func ≤≥(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound <= rhs.lowerBound && lhs.upperBound >= rhs.upperBound
     }
 
-    static func <=(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func <=(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound < rhs.lowerBound && lhs.upperBound == rhs
     }
 
-    static func ≤=(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func ≤=(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound <= rhs.lowerBound && lhs.upperBound == rhs
     }
 
-    static func =>(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func =>(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound == rhs && lhs.upperBound > rhs.upperBound
     }
 
-    static func =≥(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func =≥(lhs: TJRange, rhs: TJRange) -> Bool {
         return lhs.lowerBound == rhs && lhs.upperBound >= rhs.upperBound
     }
 
-    static func -(lhs: TJRange, rhs: TJRange) -> [TJRange] {
+    public static func -(lhs: TJRange, rhs: TJRange) -> [TJRange] {
         if rhs ≤≥ lhs {
             // Fully overlapping means the rhs dissapears.
             return []
@@ -211,12 +211,12 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
         }
     }
 
-    static func -(lhs: TJRange, rhs: ClosedRange<T>) -> [TJRange] {
+    public static func -(lhs: TJRange, rhs: ClosedRange<T>) -> [TJRange] {
         return lhs - TJRange(rhs)
     }
 }
 
-func compare<T>(_ lhs: TJRange<T>, _ rhs: TJRange<T>) -> Int {
+public func compare<T>(_ lhs: TJRange<T>, _ rhs: TJRange<T>) -> Int {
     let tmp = compare(lhs.lowerBound, rhs.lowerBound)
 
     if tmp == 0 {
