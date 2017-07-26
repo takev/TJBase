@@ -344,8 +344,35 @@ class TJRangeTests: XCTestCase {
 
     func testClosedRange_ClosedRangeSubtract() {
         XCTAssertEqual(
-            TJRange(4 ... 6) - TJRange(5 ... 7),
-            [TJRange(4 ..< 5)]
+            TJRangeSet(TJRange(4 ... 7) - TJRange(5 ... 8)),
+            TJRangeSet([TJRange(4 ..< 5)])
+        )
+
+        XCTAssertEqual(
+            TJRangeSet(TJRange(4 ... 7) - TJRange(3 ... 5)),
+            TJRangeSet([TJRange(leftOpen:5 ... 7)])
+        )
+
+        XCTAssertEqual(
+            TJRangeSet(TJRange(4 ... 7) - TJRange(3 ... 8)),
+            TJRangeSet()
+        )
+
+        XCTAssertEqual(
+            TJRangeSet(TJRange(4 ... 7) - TJRange(5 ... 6)),
+            TJRangeSet([TJRange(4 ..< 5), TJRange(leftOpen:6 ... 7)])
+        )
+    }
+
+    func testInfinteRange_AnyRangeSubtract() {
+        XCTAssertEqual(
+            TJRangeSet(TJRange() - TJRange(5 ... 8)),
+            TJRangeSet([TJRange(..<5), TJRange(leftOpen:8... as PartialRangeFrom)])
+        )
+
+        XCTAssertEqual(
+            TJRangeSet(TJRange() - TJRange(5 ..< 8)),
+            TJRangeSet([TJRange(..<5), TJRange(8... as PartialRangeFrom)])
         )
     }
 
@@ -359,5 +386,6 @@ class TJRangeTests: XCTestCase {
         ("testScalar_PartialRangeFromComparitors", testScalar_PartialRangeFromComparitors),
         ("testClosedRange_ClosedRangeComparitors", testClosedRange_ClosedRangeComparitors),
         ("testClosedRange_ClosedRangeSubtract", testClosedRange_ClosedRangeSubtract),
+        ("testInfinteRange_AnyRangeSubtract", testInfinteRange_AnyRangeSubtract),
     ]
 }

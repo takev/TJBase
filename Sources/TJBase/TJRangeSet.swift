@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-struct TJRangeSet<T: Comparable>: Sequence {
+struct TJRangeSet<T: Comparable>: Sequence, Equatable {
     var elements: [TJRange<T>] = []
 
     var count: Int {
@@ -27,22 +27,36 @@ struct TJRangeSet<T: Comparable>: Sequence {
         }
     }
 
-    init(_ elementRanges: [ClosedRange<T>], inverted: Bool=false) {
+    init(_ ranges: [ClosedRange<T>], inverted: Bool=false) {
         self.init(full: inverted)
 
         if inverted {
-            for elementRange in elementRanges {
-                remove(elementRange)
+            for range in ranges {
+                remove(range)
             }
         } else {
-            for elementRange in elementRanges {
-                insert(elementRange)
+            for range in ranges {
+                insert(range)
             }
         }
     }
 
-    init(_ elements: [T], _ elementRanges: [ClosedRange<T>] = [], inverted: Bool=false) {
-        self.init(elementRanges + elements.map { $0 ... $0 }, inverted: inverted)
+    init(_ elements: [T], _ ranges: [ClosedRange<T>] = [], inverted: Bool=false) {
+        self.init(ranges + elements.map { $0 ... $0 }, inverted: inverted)
+    }
+
+    init(_ ranges: [TJRange<T>], inverted: Bool=false) {
+        self.init(full: inverted)
+
+        if inverted {
+            for range in ranges {
+                remove(range)
+            }
+        } else {
+            for range in ranges {
+                insert(range)
+            }
+        }
     }
 
     mutating func remove(_ element: TJRange<T>) {
@@ -64,6 +78,12 @@ struct TJRangeSet<T: Comparable>: Sequence {
 
     mutating func insert(_ element: TJRange<T>) {
         remove(element)
+
+        for i in 0 ..< elements.count {
+            if compare(element, elements[i]) < 0 {
+                return elements.insert(element, at: i)
+            }
+        }
         elements.append(element)
     }
 
@@ -82,5 +102,19 @@ struct TJRangeSet<T: Comparable>: Sequence {
             }
         }
         return false
+    }
+
+    static func ==(lhs: TJRangeSet, rhs: TJRangeSet) -> Bool {
+        guard lhs.count == rhs.count else {
+            return false
+        }
+
+        for i in 0 ..< lhs.count {
+            guard lhs.elements[i] === rhs.elements[i] else {
+                return false
+            }
+        }
+
+        return true
     }
 }

@@ -78,6 +78,10 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
         self.init(.Closed(range.lowerBound), .Max)
     }
 
+    init(leftOpen range: PartialRangeFrom<T>) {
+        self.init(.OpenHigh(range.lowerBound), .Max)
+    }
+
     init(_ range: PartialRangeUpTo<T>) {
         self.init(.Min, .OpenLow(range.upperBound))
     }
@@ -155,52 +159,52 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
     }
 
     static func -(lhs: TJRange, rhs: TJRange) -> [TJRange] {
-        if lhs ≤≥ rhs {
+        if rhs ≤≥ lhs {
             // Fully overlapping means the rhs dissapears.
             return []
 
-        } else if lhs != rhs {
+        } else if rhs != lhs {
             // Not overlapping.
             return [lhs]
 
-        } else if lhs =≥ rhs {
-            // Overlapping on the lower bound, rhs becomes shorter.
-            switch lhs.lowerBound {
-                case     .Min:          return [TJRange(rhs.lowerBound, .Min)]
-                case let .OpenLow(v):   return [TJRange(rhs.lowerBound, .OpenLow(v))]
-                case let .Closed(v):    return [TJRange(rhs.lowerBound, .OpenLow(v))]
-                case let .OpenHigh(v):  return [TJRange(rhs.lowerBound, .Closed(v))]
-                case     .Max:          return [TJRange(rhs.lowerBound, .Max)]
+        } else if rhs =≥ lhs {
+            // rhs overlaps the lhs.upperBound
+            switch rhs.lowerBound {
+                case     .Min:          return [TJRange(lhs.lowerBound, .Min)]
+                case let .OpenLow(v):   return [TJRange(lhs.lowerBound, .OpenLow(v))]
+                case let .Closed(v):    return [TJRange(lhs.lowerBound, .OpenLow(v))]
+                case let .OpenHigh(v):  return [TJRange(lhs.lowerBound, .Closed(v))]
+                case     .Max:          return [TJRange(lhs.lowerBound, .Max)]
             }
 
-        } else if lhs ≤= rhs {
-            // Overlapping on the lower bound, rhs becomes shorter.
-            switch lhs.upperBound {
-                case     .Min:          return [TJRange(.Min,           rhs.upperBound)]
-                case let .OpenLow(v):   return [TJRange(.Closed(v),     rhs.upperBound)]
-                case let .Closed(v):    return [TJRange(.OpenHigh(v),   rhs.upperBound)]
-                case let .OpenHigh(v):  return [TJRange(.OpenHigh(v),   rhs.upperBound)]
-                case     .Max:          return [TJRange(.Max,           rhs.upperBound)]
+        } else if rhs ≤= lhs {
+            // rhs overlaps the lhs.lowerBound
+            switch rhs.upperBound {
+                case     .Min:          return [TJRange(.Min,           lhs.upperBound)]
+                case let .OpenLow(v):   return [TJRange(.Closed(v),     lhs.upperBound)]
+                case let .Closed(v):    return [TJRange(.OpenHigh(v),   lhs.upperBound)]
+                case let .OpenHigh(v):  return [TJRange(.OpenHigh(v),   lhs.upperBound)]
+                case     .Max:          return [TJRange(.Max,           lhs.upperBound)]
             }
 
         } else {
-            // lhs is completely inside rhs without touching the edges.
+            // rhs is completely inside lhs without touching the edges.
             var ranges : [TJRange<T>] = []
 
-            switch lhs.lowerBound {
-                case     .Min:          ranges.append(TJRange(rhs.lowerBound, .Min))
-                case let .OpenLow(v):   ranges.append(TJRange(rhs.lowerBound, .OpenLow(v)))
-                case let .Closed(v):    ranges.append(TJRange(rhs.lowerBound, .OpenLow(v)))
-                case let .OpenHigh(v):  ranges.append(TJRange(rhs.lowerBound, .Closed(v)))
-                case     .Max:          ranges.append(TJRange(rhs.lowerBound, .Max))
+            switch rhs.lowerBound {
+                case     .Min:          ranges.append(TJRange(lhs.lowerBound, .Min))
+                case let .OpenLow(v):   ranges.append(TJRange(lhs.lowerBound, .OpenLow(v)))
+                case let .Closed(v):    ranges.append(TJRange(lhs.lowerBound, .OpenLow(v)))
+                case let .OpenHigh(v):  ranges.append(TJRange(lhs.lowerBound, .Closed(v)))
+                case     .Max:          ranges.append(TJRange(lhs.lowerBound, .Max))
             }
 
-            switch lhs.upperBound {
-                case     .Min:          ranges.append(TJRange(.Min,           rhs.upperBound))
-                case let .OpenLow(v):   ranges.append(TJRange(.Closed(v),     rhs.upperBound))
-                case let .Closed(v):    ranges.append(TJRange(.OpenHigh(v),   rhs.upperBound))
-                case let .OpenHigh(v):  ranges.append(TJRange(.OpenHigh(v),   rhs.upperBound))
-                case     .Max:          ranges.append(TJRange(.Max,           rhs.upperBound))
+            switch rhs.upperBound {
+                case     .Min:          ranges.append(TJRange(.Min,           lhs.upperBound))
+                case let .OpenLow(v):   ranges.append(TJRange(.Closed(v),     lhs.upperBound))
+                case let .Closed(v):    ranges.append(TJRange(.OpenHigh(v),   lhs.upperBound))
+                case let .OpenHigh(v):  ranges.append(TJRange(.OpenHigh(v),   lhs.upperBound))
+                case     .Max:          ranges.append(TJRange(.Max,           lhs.upperBound))
             }
 
             return ranges
@@ -210,23 +214,17 @@ struct TJRange<T: Comparable>: CustomStringConvertible {
     static func -(lhs: TJRange, rhs: ClosedRange<T>) -> [TJRange] {
         return lhs - TJRange(rhs)
     }
-
-
 }
 
-extension Array: Equatable where Element: Comparable {
-    func ==<T>(lhs: [T], rhs: [T]) -> Bool {
-        guard lhs.count == rhs.count else {
-            return false
-        }
+func compare<T>(_ lhs: TJRange<T>, _ rhs: TJRange<T>) -> Int {
+    let tmp = compare(lhs.lowerBound, rhs.lowerBound)
 
-        for i in 0 ..< lhs.count {
-            guard lhs[i] === rhs[i] else {
-                return false
-            }
-        }
+    if tmp == 0 {
+        return compare(lhs.upperBound, rhs.upperBound)
 
-        return true
+    } else {
+        return tmp
     }
 }
+
 
