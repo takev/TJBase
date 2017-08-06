@@ -1,4 +1,4 @@
-// TJRegex - A Swift package for working with large integers.
+// TJRegex - A Swift package with same basic utilities and types.
 // Copyright (C) 2017  Tjienta Vara
 //
 // This program is free software: you can redistribute it and/or modify
@@ -14,5 +14,5 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-infix operator ~<  : ComparisonPrecedence
+//infix operator ~<  : ComparisonPrecedence
 

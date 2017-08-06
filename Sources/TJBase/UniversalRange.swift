@@ -1,4 +1,4 @@
-// TJRegex - A Swift package for working with large integers.
+// TJRegex - A Swift package with same basic utilities and types.
 // Copyright (C) 2017  Tjienta Vara
 //
 // This program is free software: you can redistribute it and/or modify
@@ -14,12 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-enum Bound<T: Comparable>: Equatable {
+enum RangeEndPoint<T: Comparable>: Equatable {
     case Open(T)
     case Closed(T)
     case Infinite
 
-    static func == (lhs: Bound, rhs: Bound) -> Bool {
+    static func == (lhs: RangeEndPoint, rhs: RangeEndPoint) -> Bool {
         switch (lhs, rhs) {
             case let (.Open(l),     .Open(r))   where l == r: return true
             case let (.Closed(l),   .Closed(r)) where l == r: return true
@@ -28,7 +28,7 @@ enum Bound<T: Comparable>: Equatable {
         }
     }
 
-    static func <= (_ lhs: Bound, _ rhs: Bound) -> Bool {
+    static func <= (_ lhs: RangeEndPoint, _ rhs: RangeEndPoint) -> Bool {
         switch (lhs, rhs) {
             case     (.Infinite,    _):          return true
             case     (_,            .Infinite):  return true
@@ -40,30 +40,11 @@ enum Bound<T: Comparable>: Equatable {
     }
 }
 
-enum CompareResult {
-    case Lower
-    case Same
-    case Higher
-}
-
-enum RangeCompareResult {
-    case Lower              // The primary range is not overlapping and lower than the secondary range.
-    case OverlapLower       // The primary range is overlapping and lower than the secondary range.
-    case FullOverlapLower   // The primary range is fully overlapping with the secondary range and extending on the lower side.
-    case InsideLowerEdge    // The primary range is inside the secondary range and touching the lower edge.
-    case FullOverlap        // The primary range is fully overlapping with the secondary range and extending on both sides.
-    case Same               // The primary range is inside the secondary range and touching both edges.
-    case Inside             // The primary range is inside the secondary range but not touching either edge.
-    case InsideHigherEdge   // The primary range is inside the secondary range and touching the higher edge.
-    case FullOverlapHigher  // The primary range is fully overlapping with the secondary range and extending on the higher side.
-    case OverlapHigher      // The primary range is overlapping and higher than the secondary range.
-    case Higher             // The primary range is not overlapping and lower than the secondary range.
-}
-
-
-public struct TJRange<T: Comparable>: CustomStringConvertible, Equatable, Comparable {
-    let lowerBound: Bound<T>
-    let upperBound: Bound<T>
+/// An Range with selectable open-, closed- or infinite-end points.
+/// It can be used in situations where you have a mix of ranges with different types of end-points.
+public struct UniversalRange<T: Comparable>: CustomStringConvertible, Equatable, Comparable {
+    let lowerBound: RangeEndPoint<T>
+    let upperBound: RangeEndPoint<T>
 
     public var description : String {
         switch (lowerBound, upperBound) {
@@ -80,7 +61,7 @@ public struct TJRange<T: Comparable>: CustomStringConvertible, Equatable, Compar
         }
     }
 
-    init(_ lowerBound: Bound<T>, _ upperBound: Bound<T>) {
+    init(_ lowerBound: RangeEndPoint<T>, _ upperBound: RangeEndPoint<T>) {
         assert(lowerBound <= upperBound, "upperBound must be greater or equal to lowerBound")
 
         self.lowerBound = lowerBound
@@ -127,11 +108,11 @@ public struct TJRange<T: Comparable>: CustomStringConvertible, Equatable, Compar
         self.init(.Infinite, .Closed(range.upperBound))
     }
 
-    public static func ==(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func ==(lhs: UniversalRange, rhs: UniversalRange) -> Bool {
         return lhs.lowerBound == rhs.lowerBound && lhs.upperBound == rhs.upperBound
     }
 
-    public static func <(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func <(lhs: UniversalRange, rhs: UniversalRange) -> Bool {
         switch (lhs.lowerBound, rhs.lowerBound) {
             case     (.Infinite,    .Infinite):                 break
             case     (.Infinite,    _):                         return true
@@ -210,7 +191,7 @@ public struct TJRange<T: Comparable>: CustomStringConvertible, Equatable, Compar
         }
     }
 
-    func compareLowerBound(_ other: Bound<T>) -> CompareResult {
+    func compareLowerBound(_ other: RangeEndPoint<T>) -> CompareResult {
         switch other {
             case     .Infinite:     return compareLowerInfinite()
             case let .Closed(v):    return compare(v)
@@ -218,7 +199,7 @@ public struct TJRange<T: Comparable>: CustomStringConvertible, Equatable, Compar
         }
     }
 
-    func compareUpperBound(_ other: Bound<T>) -> CompareResult {
+    func compareUpperBound(_ other: RangeEndPoint<T>) -> CompareResult {
         switch other {
             case     .Infinite:     return compareUpperInfinite()
             case let .Closed(v):    return compare(v)
@@ -226,7 +207,7 @@ public struct TJRange<T: Comparable>: CustomStringConvertible, Equatable, Compar
         }
     }
 
-    func compare(_ other: TJRange) -> RangeCompareResult {
+    func compare(_ other: UniversalRange) -> RangeCompareResult {
         switch (compareLowerBound(other.lowerBound), compareUpperBound(other.upperBound)) {
             case (.Lower,  .Lower):     return .Lower
             case (.Lower,  .Same):      return other.upperBound == upperBound ? .FullOverlapLower : .OverlapLower
@@ -249,18 +230,18 @@ public struct TJRange<T: Comparable>: CustomStringConvertible, Equatable, Compar
         }
     }
 
-    public static func ~=(lhs: TJRange,  rhs: T) -> Bool {
+    public static func ~=(lhs: UniversalRange,  rhs: T) -> Bool {
         return lhs.compare(rhs) == .Same
     }
 
-    public static func ~=(lhs: TJRange, rhs: TJRange) -> Bool {
+    public static func ~=(lhs: UniversalRange, rhs: UniversalRange) -> Bool {
         switch lhs.compare(rhs) {
             case .Inside, .InsideLowerEdge, .InsideHigherEdge, .Same: return true
             default: return false
         }
     }
 
-    public static func -(lhs: TJRange, rhs: TJRange) -> [TJRange] {
+    public static func -(lhs: UniversalRange, rhs: UniversalRange) -> [UniversalRange] {
         switch lhs.compare(rhs) {
         case .Same, .FullOverlap, .FullOverlapLower, .FullOverlapHigher:
             // Fully overlapping means the lhs dissapears.
@@ -274,16 +255,16 @@ public struct TJRange<T: Comparable>: CustomStringConvertible, Equatable, Compar
             // rhs overlaps the lhs on the upperBound, chopping of the upperBound
             switch rhs.lowerBound {
                 case     .Infinite:     return [] // Both lowerBounds are -infinite
-                case let .Open(v):      return [TJRange(lhs.lowerBound, .Closed(v))]
-                case let .Closed(v):    return [TJRange(lhs.lowerBound, .Open(v))]
+                case let .Open(v):      return [UniversalRange(lhs.lowerBound, .Closed(v))]
+                case let .Closed(v):    return [UniversalRange(lhs.lowerBound, .Open(v))]
             }
 
         case .OverlapLower, .InsideLowerEdge:
             // rhs overlaps the lhs on the lowerBound, chopping of the lowerBound
             switch rhs.upperBound {
                 case     .Infinite:     return [] // Both upperBounds are +infinite
-                case let .Open(v):      return [TJRange(.Closed(v), lhs.upperBound)]
-                case let .Closed(v):    return [TJRange(.Open(v), lhs.upperBound)]
+                case let .Open(v):      return [UniversalRange(.Closed(v), lhs.upperBound)]
+                case let .Closed(v):    return [UniversalRange(.Open(v), lhs.upperBound)]
             }
 
         case .Inside:
@@ -291,21 +272,21 @@ public struct TJRange<T: Comparable>: CustomStringConvertible, Equatable, Compar
             switch (rhs.lowerBound, rhs.upperBound) {
                 case     (.Infinite,    _):             preconditionFailure("Infinte inside bound is not possible.")
                 case     (_,            .Infinite):     preconditionFailure("Infinte inside bound is not possible.")
-                case let (.Open(l),     .Open(u)):      return [TJRange(lhs.lowerBound, .Closed(l)), TJRange(.Closed(u), lhs.upperBound)]
-                case let (.Open(l),     .Closed(u)):    return [TJRange(lhs.lowerBound, .Closed(l)), TJRange(.Open(u),   lhs.upperBound)]
-                case let (.Closed(l),   .Open(u)):      return [TJRange(lhs.lowerBound, .Open(l)),   TJRange(.Closed(u), lhs.upperBound)]
-                case let (.Closed(l),   .Closed(u)):    return [TJRange(lhs.lowerBound, .Open(l)),   TJRange(.Open(u),   lhs.upperBound)]
+                case let (.Open(l),     .Open(u)):      return [UniversalRange(lhs.lowerBound, .Closed(l)), UniversalRange(.Closed(u), lhs.upperBound)]
+                case let (.Open(l),     .Closed(u)):    return [UniversalRange(lhs.lowerBound, .Closed(l)), UniversalRange(.Open(u),   lhs.upperBound)]
+                case let (.Closed(l),   .Open(u)):      return [UniversalRange(lhs.lowerBound, .Open(l)),   UniversalRange(.Closed(u), lhs.upperBound)]
+                case let (.Closed(l),   .Closed(u)):    return [UniversalRange(lhs.lowerBound, .Open(l)),   UniversalRange(.Open(u),   lhs.upperBound)]
             }
         }
     }
 
-    public static func -(lhs: TJRange, rhs: ClosedRange<T>) -> [TJRange] {
-        return lhs - TJRange(rhs)
+    public static func -(lhs: UniversalRange, rhs: ClosedRange<T>) -> [UniversalRange] {
+        return lhs - UniversalRange(rhs)
     }
 }
 
-func merge<T>(_ ranges: [TJRange<T>]) -> [TJRange<T>] {
-    var tmp: [TJRange<T>] = []
+func merge<T>(_ ranges: [UniversalRange<T>]) -> [UniversalRange<T>] {
+    var tmp: [UniversalRange<T>] = []
     tmp.reserveCapacity(ranges.count * 3)
 
     for newRange in ranges {
@@ -323,9 +304,9 @@ func merge<T>(_ ranges: [TJRange<T>]) -> [TJRange<T>] {
     return tmp
 }
 
-prefix func ~ <T>(ranges: [TJRange<T>]) -> [TJRange<T>] {
+prefix func ~ <T>(ranges: [UniversalRange<T>]) -> [UniversalRange<T>] {
     // Start with an infinite range from which to subtract ranges.
-    var tmp: [TJRange<T>] = [TJRange()]
+    var tmp: [UniversalRange<T>] = [UniversalRange()]
     tmp.reserveCapacity(ranges.count * 2)
 
     for newRange in ranges {
