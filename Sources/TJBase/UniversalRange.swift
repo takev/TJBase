@@ -285,7 +285,7 @@ public struct UniversalRange<T: Comparable>: CustomStringConvertible, Equatable,
     }
 }
 
-func merge<T>(_ ranges: [UniversalRange<T>]) -> [UniversalRange<T>] {
+public func nonOverlappingMerge<T>(_ ranges: [UniversalRange<T>]) -> [UniversalRange<T>] {
     var tmp: [UniversalRange<T>] = []
     tmp.reserveCapacity(ranges.count * 3)
 
@@ -304,7 +304,7 @@ func merge<T>(_ ranges: [UniversalRange<T>]) -> [UniversalRange<T>] {
     return tmp
 }
 
-prefix func ~ <T>(ranges: [UniversalRange<T>]) -> [UniversalRange<T>] {
+public func invertedNonOverlappingMerge<T>(_ ranges: [UniversalRange<T>]) -> [UniversalRange<T>] {
     // Start with an infinite range from which to subtract ranges.
     var tmp: [UniversalRange<T>] = [UniversalRange()]
     tmp.reserveCapacity(ranges.count * 2)
