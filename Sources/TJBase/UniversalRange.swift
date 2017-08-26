@@ -48,16 +48,16 @@ public struct UniversalRange<T: Comparable>: CustomStringConvertible, Equatable,
 
     public var description : String {
         switch (lowerBound, upperBound) {
-            case let (.Infinite,        .Open(v2)):                     return "∞-\(v2)"
-            case let (.Infinite,        .Closed(v2)):                   return "∞-/\(v2)"
+            case let (.Infinite,        .Open(v2)):                     return "∞→\(v2)"
+            case let (.Infinite,        .Closed(v2)):                   return "∞-\(v2)"
             case     (.Infinite,        .Infinite):                     return "∞-∞"
-            case let (.Closed(v1),      .Open(v2)):                     return "\(v1)/-\(v2)"
+            case let (.Closed(v1),      .Open(v2)):                     return "\(v1)→\(v2)"
             case let (.Closed(v1),      .Closed(v2))    where v1 == v2: return "\(v1)"
-            case let (.Closed(v1),      .Closed(v2)):                   return "\(v1)/\(v2)"
-            case let (.Closed(v1),      .Infinite):                     return "\(v1)/-∞"
-            case let (.Open(v1),        .Open(v2)):                     return "\(v1)-\(v2)"
-            case let (.Open(v1),        .Closed(v2)):                   return "\(v1)-/\(v2)"
-            case let (.Open(v1),        .Infinite):                     return "\(v1)-∞"
+            case let (.Closed(v1),      .Closed(v2)):                   return "\(v1)-\(v2)"
+            case let (.Closed(v1),      .Infinite):                     return "\(v1)-∞"
+            case let (.Open(v1),        .Open(v2)):                     return "\(v1)↔︎\(v2)"
+            case let (.Open(v1),        .Closed(v2)):                   return "\(v1)←\(v2)"
+            case let (.Open(v1),        .Infinite):                     return "\(v1)←∞"
         }
     }
 
