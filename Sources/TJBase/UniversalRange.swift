@@ -14,10 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-enum RangeEndPoint<T: Comparable>: Equatable {
+public protocol ComparableAndHashable: Comparable, Hashable {
+}
+
+enum RangeEndPoint<T: ComparableAndHashable>: Hashable {
     case Open(T)
     case Closed(T)
     case Infinite
+
+    public var hashValue: Int {
+        switch (self) {
+            case let .Open(v):   return v.hashValue
+            case let .Closed(v): return v.hashValue
+            case     .Infinite:  return 1
+        }
+    }
 
     static func == (lhs: RangeEndPoint, rhs: RangeEndPoint) -> Bool {
         switch (lhs, rhs) {
@@ -42,7 +53,9 @@ enum RangeEndPoint<T: Comparable>: Equatable {
 
 /// An Range with selectable open-, closed- or infinite-end points.
 /// It can be used in situations where you have a mix of ranges with different types of end-points.
-public struct UniversalRange<T: Comparable>: CustomStringConvertible, Equatable, Comparable {
+public struct UniversalRange<T: ComparableAndHashable>: CustomStringConvertible, Equatable, Comparable, Hashable {
+    public let hashValue: Int
+
     let lowerBound: RangeEndPoint<T>
     let upperBound: RangeEndPoint<T>
 
@@ -66,6 +79,8 @@ public struct UniversalRange<T: Comparable>: CustomStringConvertible, Equatable,
 
         self.lowerBound = lowerBound
         self.upperBound = upperBound
+
+        hashValue = self.lowerBound.hashValue ^ self.upperBound.hashValue
     }
 
     public init() {
