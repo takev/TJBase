@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-public protocol ComparableAndHashable: Comparable, Hashable {
-}
-
-enum RangeEndPoint<T: ComparableAndHashable>: Hashable {
+enum RangeEndPoint<T: Comparable> where T: Hashable {
     case Open(T)
     case Closed(T)
     case Infinite
@@ -53,7 +50,7 @@ enum RangeEndPoint<T: ComparableAndHashable>: Hashable {
 
 /// An Range with selectable open-, closed- or infinite-end points.
 /// It can be used in situations where you have a mix of ranges with different types of end-points.
-public struct UniversalRange<T: ComparableAndHashable>: CustomStringConvertible, Equatable, Comparable, Hashable {
+public struct UniversalRange<T: Comparable>: CustomStringConvertible, Equatable, Comparable, Hashable where T: Hashable {
     public let hashValue: Int
 
     let lowerBound: RangeEndPoint<T>
@@ -336,6 +333,4 @@ public func invertedNonOverlappingMerge<T>(_ ranges: [UniversalRange<T>]) -> [Un
 
     return tmp
 }
-
-
 
