@@ -99,6 +99,10 @@ class UniversalRangeTests: XCTestCase {
         XCTAssertEqual(UniversalRange() - UniversalRange(5 ..< 8),            [UniversalRange(..<5), UniversalRange(8... as PartialRangeFrom)])
     }
 
+    func testUnion() {
+
+    }
+
     static var allTests: [(String, (UniversalRangeTests) -> () -> Void)] = [
         ("testScalar_ClosedRangeComparitors", testScalar_ClosedRangeComparitors),
         ("testScalar_RangeComparitors", testScalar_RangeComparitors),
@@ -110,5 +114,6 @@ class UniversalRangeTests: XCTestCase {
         ("testClosedRange_ClosedRangeComparitors", testClosedRange_ClosedRangeComparitors),
         ("testClosedRange_ClosedRangeSubtract", testClosedRange_ClosedRangeSubtract),
         ("testInfinteRange_AnyRangeSubtract", testInfinteRange_AnyRangeSubtract),
+        ("testUnion", testUnion),
     ]
 }
